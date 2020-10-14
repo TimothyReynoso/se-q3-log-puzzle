@@ -20,6 +20,8 @@ import sys
 import urllib.request
 import argparse
 
+__author__ = "Timothy Reynoso and Peter Mayor"
+
 
 def read_urls(filename):
     """Returns a list of the puzzle URLs from the given log file,
@@ -27,6 +29,19 @@ def read_urls(filename):
     alphabetically in increasing order, and screening out duplicates.
     """
     # +++your code here+++
+    with open(filename, 'r') as f:
+        data = f.read()
+        # print(data)
+        domain = "http://" + filename.split("_")[1]
+        image = re.findall(r"(?<=\"GET )(.*?)(?=.jpg)", data)
+        image_urls = []
+        for item in image:
+            url = f'{domain}{item}.jpg'
+            image_urls.append(url)
+        urls = set(image_urls)
+        image_urls_list = list(urls)
+        image_urls_list.sort(key=lambda x: x[-8:-4])
+        return image_urls_list
     pass
 
 
@@ -38,7 +53,20 @@ def download_images(img_urls, dest_dir):
     to show each local image file.
     Creates the directory if necessary.
     """
-    # +++your code here+++
+    if not (os.path.isdir(dest_dir)):
+        os.makedirs(dest_dir)
+
+    with open(os.path.join(dest_dir, 'index.html'), 'w') as f:
+        f.write("<html><body>")
+        for i, img in enumerate(img_urls[:-1]):
+            f.write(f"<img src='img{i}.jpg'>")
+        f.write("</body></html>")
+
+    for i, img in enumerate(img_urls):
+        print(i, img)
+        img_path = os.path.join(dest_dir, "img" + str(i) + ".jpg")
+        if img.find('no_picture') == -1:
+            urllib.request.urlretrieve(img, img_path)
     pass
 
 
